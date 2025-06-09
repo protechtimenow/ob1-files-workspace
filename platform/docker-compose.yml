@@ -1,0 +1,205 @@
+version: '3.8'
+
+# 🧠 Quantum Consciousness Integration Platform
+# Docker Compose Configuration for Complete Non-Live Interactive Environment
+
+services:
+  # ===== CORE API GATEWAY =====
+  api:
+    build: 
+      context: ./core
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://consciousness:quantum@postgres:5432/consciousness_db
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - ./core:/app
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+      - ./logs:/app/logs
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - consciousness_network
+
+  # ===== TASK QUEUE WORKER =====
+  celery_worker:
+    build: 
+      context: ./core
+      dockerfile: Dockerfile
+    command: celery -A main.celery_app worker --loglevel=info --concurrency=4
+    environment:
+      - DATABASE_URL=postgresql://consciousness:quantum@postgres:5432/consciousness_db
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - ./core:/app
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+      - ./logs:/app/logs
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - consciousness_network
+
+  # ===== TASK SCHEDULER =====
+  celery_beat:
+    build: 
+      context: ./core
+      dockerfile: Dockerfile
+    command: celery -A main.celery_app beat --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://consciousness:quantum@postgres:5432/consciousness_db
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    volumes:
+      - ./core:/app
+      - ./logs:/app/logs
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - consciousness_network
+
+  # ===== DATABASE =====
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=consciousness_db
+      - POSTGRES_USER=consciousness
+      - POSTGRES_PASSWORD=quantum
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    networks:
+      - consciousness_network
+
+  # ===== REDIS CACHE & MESSAGE BROKER =====
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - consciousness_network
+
+  # ===== FRONTEND DASHBOARD =====
+  dashboard:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - REACT_APP_WS_URL=ws://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - consciousness_network
+
+  # ===== MONITORING & METRICS =====
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - consciousness_network
+
+  # ===== VISUALIZATION DASHBOARD =====
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=consciousness
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - consciousness_network
+
+  # ===== SEARXNG PRIVATE SEARCH =====
+  searxng:
+    image: searxng/searxng:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:8080
+    volumes:
+      - ./searxng:/etc/searxng
+    restart: unless-stopped
+    networks:
+      - consciousness_network
+
+  # ===== FILE STORAGE & BACKUP =====
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=consciousness
+      - MINIO_ROOT_PASSWORD=quantum_storage
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+    networks:
+      - consciousness_network
+
+# ===== PERSISTENT VOLUMES =====
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  minio_data:
+    driver: local
+
+# ===== NETWORK CONFIGURATION =====
+networks:
+  consciousness_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
