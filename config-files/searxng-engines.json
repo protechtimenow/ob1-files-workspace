@@ -1,0 +1,109 @@
+{
+  "engine_configurations": {
+    "blockchain_optimized": {
+      "engines": ["google", "duckduckgo", "github", "stackoverflow"],
+      "description": "Optimized for blockchain and crypto searches",
+      "categories": ["general", "it"]
+    },
+    "documentation_focused": {
+      "engines": ["google", "duckduckgo", "github", "readthedocs"],
+      "description": "Best for finding technical documentation",
+      "categories": ["general"]
+    },
+    "security_research": {
+      "engines": ["google", "duckduckgo", "github", "cve_search"],
+      "description": "Focused on security and vulnerability research",
+      "categories": ["general", "it"]
+    },
+    "academic_research": {
+      "engines": ["google", "duckduckgo", "semantic_scholar", "arxiv"],
+      "description": "Academic papers and research",
+      "categories": ["science"]
+    },
+    "comprehensive": {
+      "engines": ["google", "bing", "duckduckgo", "startpage", "yahoo"],
+      "description": "Comprehensive search across multiple engines",
+      "categories": ["general"]
+    }
+  },
+  "search_categories": {
+    "general": "General web search",
+    "images": "Image search",
+    "videos": "Video search",
+    "news": "News search",
+    "music": "Music search",
+    "it": "IT and programming related",
+    "science": "Scientific and academic content",
+    "files": "File downloads",
+    "map": "Maps and location-based",
+    "social_media": "Social media content"
+  },
+  "blockchain_specific_engines": {
+    "protocol_research": {
+      "engines": ["google", "duckduckgo"],
+      "query_modifiers": [
+        "site:ethereum.org",
+        "site:docs.uniswap.org",
+        "site:compound.finance",
+        "site:docs.aave.com"
+      ]
+    },
+    "code_search": {
+      "engines": ["github", "google"],
+      "query_modifiers": [
+        "site:github.com",
+        "filetype:sol",
+        "filetype:js",
+        "filetype:py"
+      ]
+    },
+    "audit_reports": {
+      "engines": ["google", "duckduckgo"],
+      "query_modifiers": [
+        "site:github.com audit",
+        "filetype:pdf audit",
+        "security review"
+      ]
+    }
+  },
+  "result_filters": {
+    "high_quality_domains": [
+      "github.com",
+      "ethereum.org",
+      "docs.soliditylang.org",
+      "openzeppelin.com",
+      "consensys.net",
+      "blog.ethereum.org"
+    ],
+    "documentation_indicators": [
+      "/docs/",
+      "/documentation/",
+      "/api/",
+      "/guide/",
+      "/tutorial/",
+      "docs.",
+      "documentation."
+    ],
+    "blacklisted_domains": [
+      "spam-site.com",
+      "low-quality-content.net"
+    ]
+  },
+  "search_templates": {
+    "smart_contract_analysis": {
+      "template": "{contract_name} smart contract {analysis_type}",
+      "variables": ["contract_name", "analysis_type"],
+      "example": "Uniswap smart contract security audit"
+    },
+    "protocol_documentation": {
+      "template": "{protocol_name} {doc_type} documentation",
+      "variables": ["protocol_name", "doc_type"],
+      "example": "Compound API documentation"
+    },
+    "vulnerability_research": {
+      "template": "{vulnerability_type} {protocol_name} vulnerability",
+      "variables": ["vulnerability_type", "protocol_name"],
+      "example": "reentrancy Ethereum vulnerability"
+    }
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "api_info": {
+    "name": "SearXNG API Integration",
+    "description": "Private search API configuration for enhanced search capabilities",
+    "version": "1.0.0",
+    "created": "2024-01-09"
+  },
+  "endpoints": {
+    "search": {
+      "url": "https://your-searxng-instance.com/search",
+      "method": "GET",
+      "description": "Main search endpoint"
+    },
+    "suggestions": {
+      "url": "https://your-searxng-instance.com/autocompleter",
+      "method": "GET", 
+      "description": "Search suggestions endpoint"
+    }
+  },
+  "parameters": {
+    "q": {
+      "required": true,
+      "type": "string",
+      "description": "Search query"
+    },
+    "categories": {
+      "required": false,
+      "type": "string",
+      "description": "Search categories (general, images, videos, news, etc.)",
+      "default": "general"
+    },
+    "engines": {
+      "required": false,
+      "type": "string",
+      "description": "Specific engines to use"
+    },
+    "lang": {
+      "required": false,
+      "type": "string",
+      "description": "Language code",
+      "default": "en"
+    },
+    "format": {
+      "required": false,
+      "type": "string",
+      "description": "Response format (json, csv, rss)",
+      "default": "json"
+    },
+    "pageno": {
+      "required": false,
+      "type": "integer",
+      "description": "Page number for pagination",
+      "default": 1
+    }
+  },
+  "response_formats": {
+    "json": {
+      "mime_type": "application/json",
+      "structure": {
+        "query": "search query",
+        "number_of_results": "integer",
+        "results": "array of result objects",
+        "suggestions": "array of suggestion strings",
+        "infoboxes": "array of infobox objects"
+      }
+    },
+    "csv": {
+      "mime_type": "text/csv",
+      "description": "Comma-separated values format"
+    },
+    "rss": {
+      "mime_type": "application/rss+xml",
+      "description": "RSS feed format"
+    }
+  }
+}
