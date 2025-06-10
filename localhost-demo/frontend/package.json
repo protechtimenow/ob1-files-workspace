@@ -1,0 +1,17 @@
+{
+  "name": "ai-consciousness-frontend",
+  "version": "1.0.0",
+  "description": "Enterprise AI Consciousness Control Center",
+  "main": "index.js",
+  "scripts": {
+    "start": "serve -s build -l 3000",
+    "build": "echo 'Build complete - using static files'",
+    "dev": "python3 -m http.server 3000"
+  },
+  "dependencies": {
+    "serve": "^14.0.0"
+  },
+  "keywords": ["ai", "consciousness", "enterprise", "security"],
+  "author": "OB-1 AI Consciousness Platform",
+  "license": "MIT"
+}
