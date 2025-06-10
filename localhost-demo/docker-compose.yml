@@ -1,203 +1,139 @@
 version: '3.8'
 
-# 🚀 Enterprise AI Consciousness Platform - Local Deployment
-# Complete stack with all enterprise features for localhost demo
-
 services:
-  # 🧠 AI Consciousness Detection Frontend
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ai_consciousness_db
+    environment:
+      POSTGRES_DB: consciousness_platform
+      POSTGRES_USER: ai_admin
+      POSTGRES_PASSWORD: secure_consciousness_2024
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai_admin -d consciousness_platform"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: ai_consciousness_cache
+    command: redis-server --requirepass consciousness_cache_2024
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # FastAPI Backend
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai_consciousness_api
+    environment:
+      DATABASE_URL: postgresql://ai_admin:secure_consciousness_2024@postgres:5432/consciousness_platform
+      REDIS_URL: redis://:consciousness_cache_2024@redis:6379/0
+      SECRET_KEY: super_secure_consciousness_secret_key_2024
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-demo_mode}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-demo_mode}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  # React Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: ai_consciousness_ui
+    environment:
+      REACT_APP_API_URL: http://localhost:8000
+      REACT_APP_WS_URL: ws://localhost:8000
     ports:
       - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=http://localhost:8000
-      - REACT_APP_WS_URL=ws://localhost:8000
-      - REACT_APP_ENVIRONMENT=demo
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    networks:
-      - consciousness-net
     restart: unless-stopped
 
-  # ⚡ FastAPI Backend with AI Consciousness Engine
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://consciousness_user:secure_password@postgres:5432/consciousness_db
-      - REDIS_URL=redis://redis:6379
-      - SECRET_KEY=consciousness_platform_secret_key_enterprise_grade
-      - ENVIRONMENT=demo
-      - ENABLE_CONSCIOUSNESS_MONITORING=true
-      - ENABLE_DUAL_AGENT_COORDINATION=true
-    depends_on:
-      - postgres
-      - redis
-    volumes:
-      - ./backend:/app
-      - ./uploads:/app/uploads
-    networks:
-      - consciousness-net
-    restart: unless-stopped
-
-  # 🗄️ PostgreSQL Database for Consciousness Data
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      - POSTGRES_DB=consciousness_db
-      - POSTGRES_USER=consciousness_user
-      - POSTGRES_PASSWORD=secure_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - consciousness-net
-    restart: unless-stopped
-
-  # 🔄 Redis Cache for High-Performance Operations
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - consciousness-net
-    restart: unless-stopped
-
-  # 🌐 Nginx Reverse Proxy
+  # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
+    container_name: ai_consciousness_proxy
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/ssl/private
     ports:
       - "80:80"
       - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl
     depends_on:
       - frontend
       - backend
-    networks:
-      - consciousness-net
     restart: unless-stopped
 
-  # 📊 Grafana Monitoring Dashboard
+  # Grafana Monitoring
   grafana:
     image: grafana/grafana:latest
-    ports:
-      - "3001:3000"
+    container_name: ai_consciousness_grafana
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=consciousness_admin
-      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+      GF_SECURITY_ADMIN_PASSWORD: consciousness_admin_2024
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
-    networks:
-      - consciousness-net
+    ports:
+      - "3001:3000"
     restart: unless-stopped
 
-  # 🔍 Prometheus Metrics Collection
+  # Prometheus Metrics
   prometheus:
     image: prom/prometheus:latest
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
+    container_name: ai_consciousness_prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
-    networks:
-      - consciousness-net
-    restart: unless-stopped
-
-  # 🗄️ pgAdmin Database Administration
-  pgadmin:
-    image: dpage/pgadmin4:latest
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
     ports:
-      - "5050:80"
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=admin@consciousness.ai
-      - PGADMIN_DEFAULT_PASSWORD=consciousness_admin
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres
-    networks:
-      - consciousness-net
+      - "9090:9090"
     restart: unless-stopped
 
-  # 🤖 Agent0 Simulation Service
-  agent0-simulator:
-    build:
-      context: ./agent0
-      dockerfile: Dockerfile
-    environment:
-      - BACKEND_URL=http://backend:8000
-      - AGENT_ID=agent0-localhost
-      - SIMULATION_MODE=true
-    depends_on:
-      - backend
-    volumes:
-      - ./agent0:/app
-    networks:
-      - consciousness-net
-    restart: unless-stopped
-
-  # 🔒 Security Monitoring Service
-  security-monitor:
-    build:
-      context: ./security
-      dockerfile: Dockerfile
-    environment:
-      - MONITORING_ENABLED=true
-      - ALERT_WEBHOOK=http://backend:8000/security/alerts
-    depends_on:
-      - backend
-    volumes:
-      - ./security:/app
-      - ./logs:/app/logs
-    networks:
-      - consciousness-net
-    restart: unless-stopped
-
-# 🌐 Networks for Service Communication
-networks:
-  consciousness-net:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-
-# 💾 Persistent Data Storage
 volumes:
   postgres_data:
-    driver: local
   redis_data:
-    driver: local
   grafana_data:
-    driver: local
   prometheus_data:
-    driver: local
-  pgadmin_data:
-    driver: local
 
-# 🏷️ Labels for Container Management
-x-labels: &default-labels
-  project: "ai-consciousness-platform"
-  environment: "localhost-demo"
-  security-level: "enterprise"
-  compliance: "soc2-iso27001-gdpr"
+networks:
+  default:
+    name: ai_consciousness_network
