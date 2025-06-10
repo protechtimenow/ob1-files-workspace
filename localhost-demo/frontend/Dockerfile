@@ -1,18 +1,21 @@
-# 🧠 AI Consciousness Platform - Frontend Container
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Install dependencies
+# Copy package files
 COPY package*.json ./
-RUN npm ci --only=production
 
-# Copy application files
+# Install dependencies
+RUN npm install
+
+# Copy source code
 COPY . .
 
 # Build the application
 RUN npm run build
 
-# Serve the application
+# Expose port
 EXPOSE 3000
+
+# Start the application
 CMD ["npm", "start"]
