@@ -1,0 +1,24 @@
+title: AI Consciousness Control Center
+description: Revolutionary Dual-Agent Platform - OB-1 + Agent0 Coordination
+theme: minima
+plugins:
+  - jekyll-feed
+
+# GitHub Pages configuration
+repository: protechtimenow/ob1-files-workspace
+github_username: protechtimenow
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+permalink: /:title/
+
+# Exclude files
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - .bundle
+  - .sass-cache
+  - _sass
+  - _includes
