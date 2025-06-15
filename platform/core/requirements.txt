@@ -34,7 +34,7 @@ PyGithub==2.1.1
 gitpython==3.1.40
 
 # ===== WEB SCRAPING & AUTOMATION =====
-aiohttp==3.9.1
+aiohttp==3.10.11
 beautifulsoup4==4.12.2
 selenium==4.16.0
 playwright==1.40.0
