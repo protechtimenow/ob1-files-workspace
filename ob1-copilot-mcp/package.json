@@ -1,0 +1,39 @@
+{
+  "name": "ob1-copilot-mcp",
+  "version": "1.0.0",
+  "description": "OB-1 Blockchain AI + GitHub Copilot MCP Integration",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "echo \"Testing OB-1 MCP Server...\" && npm run build && npm start"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "zod": "^3.22.4",
+    "axios": "^1.6.0",
+    "ws": "^8.14.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.0",
+    "@types/ws": "^8.5.0"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "mcp",
+    "copilot",
+    "ai",
+    "superstacks",
+    "ob1"
+  ],
+  "author": "OB-1 AI + protechtimenow",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/protechtimenow/ob1-files-workspace.git"
+  }
+}
