@@ -15,7 +15,7 @@ alembic==1.13.0
 scikit-learn==1.3.2
 numpy==1.24.4
 pandas==2.1.3
-torch==2.1.1
+torch==2.7.1
 transformers==4.36.0
 
 # Security & Authentication
