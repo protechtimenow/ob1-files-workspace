@@ -22,7 +22,7 @@ transformers==4.36.0
 cryptography==41.0.7
 jose[cryptography]==1.0.0
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
+python-multipart==0.0.22
 
 # File Processing
 python-magic==0.4.27
